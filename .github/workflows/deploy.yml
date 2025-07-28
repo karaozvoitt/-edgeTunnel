@@ -14,36 +14,42 @@ jobs:
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      WORKER_NAME: edge-tunnel
       SUB_PATH: ${{ secrets.SUB_PATH }}
       SUB_UUID: ${{ secrets.SUB_UUID }}
       TXT_URL: ${{ secrets.TXT_URL }}
       PROXY_IP: ${{ secrets.PROXY_IP }}
       FAKE_WEB: ${{ secrets.FAKE_WEB }}
+
     steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-    - name: Install Wrangler
-      run: npm install -g wrangler
+      - name: Install Wrangler
+        run: npm install -g wrangler
 
-    - name: Inject Secrets into wrangler
-      run: |
-        echo "$SUB_PATH" | wrangler secret put SUB_PATH
-        echo "$SUB_UUID" | wrangler secret put SUB_UUID
-        echo "$TXT_URL" | wrangler secret put TXT_URL
-        echo "$PROXY_IP" | wrangler secret put PROXY_IP
-        echo "$FAKE_WEB" | wrangler secret put FAKE_WEB
-    - name: Deploy to Cloudflare
-      run: wrangler deploy
-    - name: Enable workers.dev subdomain access
-      run: |
-        curl -X PUT \
-          "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/subdomain" \
-          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          --data "{\"subdomain\":\"${{ secrets.WORKERS_SUBDOMAIN }}\"}"
+      - name: Deploy Worker to Cloudflare
+        run: wrangler deploy
+
+      - name: Inject Secrets (after successful deploy)
+        run: |
+          echo "$SUB_PATH" | wrangler secret put SUB_PATH
+          echo "$SUB_UUID" | wrangler secret put SUB_UUID
+          echo "$TXT_URL" | wrangler secret put TXT_URL
+          echo "$PROXY_IP" | wrangler secret put PROXY_IP
+          echo "$FAKE_WEB" | wrangler secret put FAKE_WEB
+
+      - name: Confirm Worker is accessible
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://edge-tunnel.karaozvoitt.workers.dev")
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Worker 已部署并可访问"
+          else
+            echo "⚠️ Worker 未能成功响应，状态码：$STATUS"
+          fi
