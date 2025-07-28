@@ -1,4 +1,13 @@
+
 name = "edge-tunnel"
+compatibility_date = "2025-07-28"
 main = "_worker.js"
-compatibility_date = "2025-03-16"
-modules = true
+type = "javascript"
+
+account_id = "dc93ecb692666bf59c527cf28dc5dfbf"
+workers_dev = false
+
+compatibility_flags = ["nodejs_compat"]  # 可选，如使用 Node 语法
+
+[build]
+upload.format = "modules" 
