@@ -1,0 +1,40 @@
+name: Deploy edgeTunnel to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare
+    runs-on: ubuntu-latest
+    env:
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      SUB_PATH: ${{ secrets.SUB_PATH }}
+      SUB_UUID: ${{ secrets.SUB_UUID }}
+      TXT_URL: ${{ secrets.TXT_URL }}
+      PROXY_IP: ${{ secrets.PROXY_IP }}
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install Wrangler
+      run: npm install -g wrangler
+
+    - name: Inject Secrets into wrangler
+      run: |
+        echo "$SUB_PATH" | wrangler secret put SUB_PATH
+        echo "$SUB_UUID" | wrangler secret put SUB_UUID
+        echo "$TXT_URL" | wrangler secret put TXT_URL
+        echo "$PROXY_IP" | wrangler secret put PROXY_IP
+
+    - name: Deploy to Cloudflare
+      run: wrangler deploy
