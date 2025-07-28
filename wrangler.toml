@@ -1,3 +1,4 @@
 name = "edge-tunnel"
 main = "_worker.js"
 compatibility_date = "2025-03-16"
+modules = true
