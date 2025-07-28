@@ -16,7 +16,7 @@ jobs:
       SUB_UUID: ${{ secrets.SUB_UUID }}
       TXT_URL: ${{ secrets.TXT_URL }}
       PROXY_IP: ${{ secrets.PROXY_IP }}
-
+      FAKE_WEB: ${{ secrets.FAKE_WEB }}
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v3
@@ -35,6 +35,6 @@ jobs:
         echo "$SUB_UUID" | wrangler secret put SUB_UUID
         echo "$TXT_URL" | wrangler secret put TXT_URL
         echo "$PROXY_IP" | wrangler secret put PROXY_IP
-
+        echo "$FAKE_WEB" | wrangler secret put FAKE_WEB
     - name: Deploy to Cloudflare
       run: wrangler deploy
