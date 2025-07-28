@@ -5,7 +5,7 @@ main = "_worker.js"
 type = "javascript"
 
 account_id = "dc93ecb692666bf59c527cf28dc5dfbf"
-workers_dev = false
+workers_dev = true
 
 compatibility_flags = ["nodejs_compat"]  # 可选，如使用 Node 语法
 
