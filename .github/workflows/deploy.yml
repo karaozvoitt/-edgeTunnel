@@ -40,3 +40,10 @@ jobs:
         echo "$FAKE_WEB" | wrangler secret put FAKE_WEB
     - name: Deploy to Cloudflare
       run: wrangler deploy
+    - name: Enable workers.dev subdomain access
+      run: |
+        curl -X PUT \
+          "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/subdomain" \
+          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          --data "{\"subdomain\":\"${{ secrets.WORKERS_SUBDOMAIN }}\"}"
